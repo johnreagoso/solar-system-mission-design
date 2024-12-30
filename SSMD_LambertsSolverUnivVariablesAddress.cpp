@@ -26,15 +26,15 @@ double const vMaxIterations = 1000;
 
 // Prototype Functions ===================================================================================================================================================================
 double vec_magntd(double aArray[3]);
-double Fz(double* variable, double* variable2, double* variable3, double* variable4, double* variable5, double* variable6);
-double y(double* variable, double* variable2, double* variable3, double* variable4);
-double dFz(double* variable, double* variable2, double* variable3, double* variable4);
-double StumpfS(double* variable);
-double StumpfC(double* variable);
+double Fz(double variable, double variable2, double variable3, double variable4, double variable5, double variable6);
+double y(double variable, double variable2, double variable3, double variable4);
+double dFz(double variable, double variable2, double variable3, double variable4);
+double StumpfS(double variable);
+double StumpfC(double variable);
 // =======================================================================================================================================================================================
 
 int const vMax_iterations = 100;
-double const vTol = 1.00e-6;
+double const vTol = 1.00e-7;
 double const vNmax = 600;
 
 //struct LambertData SSMD_LambertsSolverUnivVariables(double aPosVector1[3], double aPosVector2[3], double vThetaSwept, double vTOF, double vMu)
@@ -70,14 +70,14 @@ struct LambertData SSMD_LambertsSolverUnivVariables(struct PlanetPosVel* aPos1, 
 	vA = sin(vThetaSwept) * sqrt((vR1 * vR2) / (1 - cos(vThetaSwept)));
 	z = 0.010;
 
-	vFz = Fz(&vR1, &vR2, &vA, &z, &vTOF, &vMu);
+	vFz = Fz(vR1, vR2, vA, z, vTOF, vMu);
 	// ======================================================================
 	// Provides for initial guess to assist with Newton Raphson iteration====
 
 	while (vFz < 0.00)
 	{
 		z = z + 0.10;
-		vFz = Fz(&vR1, &vR2, &vA, &z, &vTOF, &vMu);
+		vFz = Fz(vR1, vR2, vA, z, vTOF, vMu);
 		ii = ii + 1;
 	}
 
@@ -86,9 +86,9 @@ struct LambertData SSMD_LambertsSolverUnivVariables(struct PlanetPosVel* aPos1, 
 	while ((abs(vRatio) > vTol) && (kk <= vNmax))
 	{
 
-		dFzDenom = 1 / dFz(&vR1, &vR2, &vA, &z);
+		dFzDenom = 1 / dFz(vR1, vR2, vA, z);
 
-		vRatio = Fz(&vR1, &vR2, &vA, &z, &vTOF, &vMu) * dFzDenom;
+		vRatio = Fz(vR1, vR2, vA, z, vTOF, vMu) * dFzDenom;
 
 		z = z - vRatio;
 		//cout << z  << endl; 
@@ -104,11 +104,11 @@ struct LambertData SSMD_LambertsSolverUnivVariables(struct PlanetPosVel* aPos1, 
 	double vR1denom = 1 / vR1;
 	double vR2denom = 1 / vR2;
 
-	f = 1 - y(&vR1, &vR2, &vA, &z) * vR1denom;
+	f = 1 - y(vR1, vR2, vA, z) * vR1denom;
 
-	g = vA * sqrt(y(&vR1, &vR2, &vA, &z) / vMu);
+	g = vA * sqrt(y(vR1, vR2, vA, z) / vMu);
 
-	gDot = 1 - y(&vR1, &vR2, &vA, &z) * vR2denom;
+	gDot = 1 - y(vR1, vR2, vA, z) * vR2denom;
 
 	double vGdenom = 1 / g;
 
@@ -133,73 +133,62 @@ struct LambertData SSMD_LambertsSolverUnivVariables(struct PlanetPosVel* aPos1, 
 	return stLambertReturn;
 }
 
-double Fz(double* vR1input, double* vR2input, double* vAinput, double* zInput, double* vTOF, double* vMu)
+double Fz(double vR1, double vR2, double vA, double z, double vTOF, double vMu)
 {
 	double dummy2;
-	double z = *zInput;
-	double vR1 = *vR1input;
-	double vR2 = *vR2input;
-	double vA = *vAinput;
-
-	dummy2 = pow((y(&vR1, &vR2, &vA, &z) / StumpfC(&z)), 1.5) * StumpfS(&z) + vA * sqrt(y(&vR1, &vR2, &vA, &z)) - sqrt(*vMu) * (*vTOF);
+	dummy2 = pow((y(vR1, vR2, vA, z) / StumpfC(z)), 1.5) * StumpfS(z) + vA * sqrt(y(vR1, vR2, vA, z)) - sqrt(vMu) * (vTOF);
 
 	return dummy2;
 }
 
-double y(double* vR1, double* vR2, double* vA, double* zInput)
+double y(double vR1, double vR2, double vA, double z)
 {
 	double dummy3;
 	double vCdiv;
 
-	double z = *zInput;
-	vCdiv = 1 / sqrt(StumpfC(&z));
+	vCdiv = 1 / sqrt(StumpfC(z));
 
-	dummy3 = *vR1 + *vR2 + *vA * z * StumpfS(&z) * vCdiv - *vA * vCdiv;
+	dummy3 = vR1 + vR2 + vA * z * StumpfS(z) * vCdiv - vA * vCdiv;
 
 	return dummy3;
 }
 
-double dFz(double* vR1input, double* vR2input, double* vAinput, double* zInput)
+double dFz(double vR1, double vR2, double vA, double z)
 {
 
 	double dummy6;
-	double vAdiv8 = *vAinput / 8;
-	double z = *zInput;
-	double vR1 = *vR1input;
-	double vR2 = *vR2input;
-	double vA = *vAinput;
+	double vAdiv8 = vAinput / 8;
 
-
-	if (*zInput == 0)
+	if (zInput == 0)
 	{
-		dummy6 = 0.025 * pow(2, 0.5) * pow(y(&vR1, &vR2, &vA, 0), 1.5) + vAdiv8 * (sqrt(y(&vR1, &vR2, &vA, 0)) + vA * sqrt(1 / 2 / y(&vR1, &vR2, &vA, 0)));
+		dummy6 = 0.025 * pow(2, 0.5) * pow(y(vR1, vR2, vA, 0), 1.5) + vAdiv8 * (sqrt(y(vR1, vR2, vA, 0)) + vA * sqrt(1 / 2 / y(vR1, vR2, vA, 0)));
 	}
 	else
 	{
-		dummy6 = pow((y(&vR1, &vR2, &vA, &z) / StumpfC(&z)), 1.5) * (1 / 2 / (z) * (StumpfC(&z) - 3 * StumpfS(&z) / 2 / StumpfC(&z)) + 3 * pow(StumpfS(&z), 2) / 4 / StumpfC(&z)) +
-			vAdiv8 * (3 * StumpfS(&z) / StumpfC(&z) * sqrt(y(&vR1, &vR2, &vA, &z)) + vA * sqrt(StumpfC(&z) / y(&vR1, &vR2, &vA, &z)));
+		dummy6 = pow((y(vR1, vR2, vA, z) / StumpfC(z)), 1.5) * (1 / 2 / (z) * (StumpfC(z) - 3 * StumpfS(z) / 2 / StumpfC(z)) + 3 * pow(StumpfS(z), 2) / 4 / StumpfC(z)) +
+			vAdiv8 * (3 * StumpfS(z) / StumpfC(z) * sqrt(y(vR1, vR2, vA, z)) + vA * sqrt(StumpfC(z) / y(vR1, vR2, vA, z)));
 	}
 	return dummy6;
 }
 
-double StumpfS(double* z)
+double StumpfS(double z)
 {
 	double dummy4;
 	double vZlowDenom;
 	double vZhighDenom;
 
-	if (*z > 0) {
+	if (z > 0) {
 
-		vZlowDenom = 1 / pow(sqrt(*z), 3);
+		vZlowDenom = 1 / pow(sqrt(z), 3);
 
-		dummy4 = vZlowDenom * sqrt(*z) - vZlowDenom * sin(sqrt(*z));
+		dummy4 = vZlowDenom * sqrt(z) - vZlowDenom * sin(sqrt(z));
 
 	}
-	else if (*z < 0) {
+	else if (z < 0) {
 
-		vZhighDenom = 1 / pow(sqrt(-*z), 3);
+		vZhighDenom = 1 / pow(sqrt(-z), 3);
 
-		dummy4 = vZhighDenom * sinh(sqrt(-*z)) - vZhighDenom * sqrt(-*z);
+		dummy4 = vZhighDenom * sinh(sqrt(-z)) - vZhighDenom * sqrt(-z);
 
 	}
 	else {
@@ -209,20 +198,20 @@ double StumpfS(double* z)
 	return dummy4;
 }
 
-double StumpfC(double* z)
+double StumpfC(double z)
 {
 	double dummy5;
 	double vZdenom;
 
-	if (*z > 0) {
+	if (z > 0) {
 
-		vZdenom = 1 / (*z);
-		dummy5 = vZdenom - cos(sqrt(*z)) * vZdenom;
+		vZdenom = 1 / (z);
+		dummy5 = vZdenom - cos(sqrt(z)) * vZdenom;
 	}
-	else if (*z < 0)
+	else if (z < 0)
 	{
-		vZdenom = 1 / (*z);
-		dummy5 = -1 * cosh(sqrt(-*z)) * vZdenom + vZdenom;
+		vZdenom = 1 / (z);
+		dummy5 = -1 * cosh(sqrt(-z)) * vZdenom + vZdenom;
 	}
 
 	else {
