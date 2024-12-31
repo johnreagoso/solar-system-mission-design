@@ -4,8 +4,8 @@
 ////  Major Planets" by E.M. Standish (JPL/Caltech) available from
 ////  the JPL Solar System Dynamics web site (http://ssd.jpl.nasa.gov/).
 ////  =====================================================================
-////  Keplerian elements and their rates, with respect to the mean ecliptic
-////  and equinox of J2000, valid for the time-interval 1800 AD - 2050 AD
+////  Keplerian elements and their rates, with respect to the Mean Ecliptic
+////  and Mean Equinox of 2000 (EME2000), valid for the time-interval 1800 AD - 2050 AD
 //
 ////  This .cpp-file will compute the specific planetry ephemeris data for a
 ////  specific Julian Date
@@ -33,8 +33,8 @@ struct PlanetParameters {
 
 struct PlanetParameters PlanetSelectOrbitParameters(int vPlanetSelect)
 {
-    double earth_mu = 3.9865e5; // km^3/sec^2
-    double earth_radius = 6378;		//km
+    double earth_mu = 3.9865e5; 	// km^3/sec^2
+    double earth_radius = 6378;		// km  (Earth equatorial radius)
 
     double planet_mu, radius_planet, a_mean, a0, a1, e0, e, e1, i0, i1, L0, L, L1, w_bar0, w_bar, w_bar1, omega, omega0, omega1;
     double vPlanetMinAtmAlt; //km
