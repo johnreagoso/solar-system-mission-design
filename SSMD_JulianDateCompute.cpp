@@ -5,7 +5,7 @@
 #include <iomanip>
 
 using namespace std;
-/* This c-code will compute the Julian date for a specific Gregorian calendar date. This m-file will be
+/* This c-code will compute the Julian date for a specific Gregorian calendar date. This script will be
 specifically used departure planet ephemeris data, and then used for the arrival planet(s) ephemeris
 arrival date, and for specific iterations for the transfer orbit elements.							*/
 
